@@ -1,0 +1,43 @@
+{
+	"geode": "4.6.3",
+	"gd": {
+		"win": "2.2074",
+		"android": "2.2074",
+		"mac": "2.2074",
+		"ios": "2.2074"
+	},
+	"id": "sam.easy_exit",
+	"name": "Easy Exit",
+	"version": "v1.0.0",
+	"developer": "Sam",
+	"description": "",
+	"settings": {
+		"ListReturn": {
+			"type": "bool",
+			"name": "Leave to Level List",
+			"description": "Return to the Levels List instead of Level Screen",
+			"default": false
+		},
+		"TintColor": {
+			"type": "color",
+			"name": "Tint Color",
+			"description": "The color to tint when you are able to click to leave the level",
+			"default": "#ffffff"
+		},
+		"TintOpacity": {
+			"type": "float",
+			"name": "Tint Opacity",
+			"description": "How visible the tint should be (0 = transparent, 1 = fully visible)",
+			"default": 0.25,
+			"min": 0.0,
+			"max": 1.0,
+			"control": {
+				"slider": true
+			}
+		}
+	},
+	"links": {
+		"community": "https://discord.gg/JvTAk5rJ2p"
+	},
+	"tags": ["gameplay", "offline", "utility"]
+}
