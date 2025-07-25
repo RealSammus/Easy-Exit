@@ -12,11 +12,34 @@
 	"developer": "Sam",
 	"description": "",
 	"settings": {
+		"ContinueLevelMusic": {
+			"type": "bool",
+			"name": "Continue playing level music",
+			"description": "Continues to play the levels music in the menu (breaks when entering certain menus)",
+			"default": true
+		},
 		"ListReturn": {
 			"type": "bool",
 			"name": "Leave to Level List",
 			"description": "Return to the Levels List instead of Level Screen",
 			"default": false
+		},
+		"AutoReturn": {
+			"type": "bool",
+			"name": "Automatically leave the level",
+			"description": "Automatically exits the level to your chosen menu upon completion",
+			"default": false
+		},
+		"AutoReturnDelay": {
+			"type": "float",
+			"name": "Auto Return Delay",
+			"description": "How long between completing the level does it delay before exiting",
+			"default": 0.0,
+			"min": 0.0,
+			"max": 5.0,
+			"control": {
+				"slider": true
+			}
 		},
 		"TintColor": {
 			"type": "color",
