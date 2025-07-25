@@ -4,7 +4,9 @@ No more waiting around, just **<cy>tap</c>** the screen to leave a level **<cg>i
 
 ## <cr>Optional settings:</c>
 
-• **<cg>Continuing to play the levels music</c>** when returning to the menu
+• Disabling the mod when in **<cg>practice mdoe</c>**
+
+• **<co>Continuing to play music</c>** from the level when in the menu
 
 • Returning to either the **<cp>Level Screen</c>** or the **<cp>Levels List</c>**
 

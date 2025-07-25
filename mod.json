@@ -18,11 +18,22 @@
 			"description": "Continues to play the levels music in the menu (breaks when entering certain menus)",
 			"default": true
 		},
-		"ListReturn": {
+		"ReturnDestination": {
+			"type": "string",
+			"name": "Return Destination",
+			"description": "Which screen to go to after completing a level",
+			"default": "Current Level Screen",
+			"one-of": [
+				"Current Level Screen",
+				"Levels List Screen"
+			]
+		},
+		"PracticeReturn": {
 			"type": "bool",
-			"name": "Leave to Level List",
-			"description": "Return to the Levels List instead of Level Screen",
-			"default": false
+			"name": "Disabled in practice mode",
+			"description": "Disables the mod from working in practice mode (may break with tinting)",
+			"default": true
+
 		},
 		"AutoReturn": {
 			"type": "bool",
