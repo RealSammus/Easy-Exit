@@ -4,11 +4,13 @@ No more waiting around, just **<cy>tap</c>** the screen to leave a level **<cg>i
 
 ## <cr>Optional settings:</c>
 
-• Disabling the mod when in **<cg>practice mdoe</c>**
+• **<cg>Enabling</c>** and **<cr>disabling</c>** the mod
 
-• **<co>Continuing to play music</c>** from the level when in the menu
+• Enabling and disabling the pause menu **<ca>mod settings button</c>**
 
 • Returning to either the **<cp>Level Screen</c>** or the **<cp>Levels List</c>**
+
+• Disabling the mod when in **<cg>practice mdoe</c>**
 
 • **<cs>Automatic returning</c>** to the menu after beating a level
 
@@ -21,6 +23,8 @@ No more waiting around, just **<cy>tap</c>** the screen to leave a level **<cg>i
 ## <cl>Credits</c>
 
 - **<ca>Firee</c>** - Teaching me about publishing
+
+- **<cj>erymanthus</c>** - Bug testing
 
 ## Support
 

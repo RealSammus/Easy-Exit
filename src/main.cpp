@@ -4,8 +4,11 @@
 #include <Geode/binding/GameManager.hpp>
 #include <Geode/binding/GJGameLevel.hpp>
 #include <Geode/binding/LevelInfoLayer.hpp>
+#include <Geode/binding/LevelBrowserLayer.hpp>
+#include <Geode/binding/GJSearchObject.hpp>
 #include <Geode/binding/FMODAudioEngine.hpp>
-#include <cocos2d.h>
+#include <Geode/ui/GeodeUI.hpp>
+#include <Geode/utils/cocos.hpp>
 
 using namespace geode::prelude;
 using namespace cocos2d;
@@ -14,24 +17,61 @@ CCMenuItemSpriteExtra* g_invisibleExitButton = nullptr;
 bool g_inPracticeMode = false;
 
 class $modify(MyPauseLayer, PauseLayer) {
+    void customSetup() {
+        PauseLayer::customSetup();
+    
+        if (!Mod::get()->getSettingValue<bool>("ButtonEnabled"))
+            return;
+    
+        if (PlayLayer::get() && PlayLayer::get()->m_level &&
+            PlayLayer::get()->m_level->m_levelType == GJLevelType::Editor)
+            return;
+        
+        auto winSize = CCDirector::sharedDirector()->getWinSize();
+    
+        auto btn = geode::cocos::CCMenuItemExt::createSpriteExtraWithFilename(
+            "ModMenuButton.png"_spr,
+            1.f,
+            [](CCObject*) {
+                openSettingsPopup(Mod::get());
+            }
+        );
+    
+        btn->setPosition({ winSize.width - 523.f, winSize.height - 44.f });
+    
+        auto menu = CCMenu::create();
+        menu->setPosition({ 0.f, 0.f });
+        menu->addChild(btn);
+        menu->setZOrder(9999);
+        btn->setZOrder(9999);
+        this->addChild(menu, 9999);
+    }    
+
     void onPracticeMode(CCObject* sender) {
         PauseLayer::onPracticeMode(sender);
-        bool newState = GameManager::sharedState()->getGameVariable("0049"); // Practice mode toggle
+        bool newState = GameManager::sharedState()->getGameVariable("0049");
         g_inPracticeMode = newState;
-        log::info("[No End Screen]: Practice Mode {}", g_inPracticeMode ? "ENABLED" : "DISABLED");
     }
 };
 
 class $modify(MyPlayLayer, PlayLayer) {
     void levelComplete() {
+        if (!Mod::get()->getSettingValue<bool>("ModEnabled")) {
+            PlayLayer::levelComplete();
+            return;
+        }
+
+        if (m_level && m_level->m_levelType == GJLevelType::Editor) {
+            PlayLayer::levelComplete();
+            return;
+        }
+
         if (Mod::get()->getSettingValue<bool>("PracticeReturn") && g_inPracticeMode) {
-            log::info("[No End Screen]: Skipping mod effects due to Practice Mode");
             PlayLayer::levelComplete();
             return;
         }
 
         PlayLayer::levelComplete();
-        log::info("[No End Screen]: Level complete");
         g_inPracticeMode = false;
 
         auto winSize = CCDirector::sharedDirector()->getWinSize();
@@ -49,7 +89,6 @@ class $modify(MyPlayLayer, PlayLayer) {
 
         if (Mod::get()->getSettingValue<bool>("AutoReturn")) {
             float delay = Mod::get()->getSettingValue<float>("AutoReturnDelay");
-            log::info("[No End Screen]: AutoReturn enabled — returning in {}s", delay);
             this->runAction(CCSequence::createWithTwoActions(
                 CCDelayTime::create(delay),
                 CCCallFunc::create(this, callfunc_selector(MyPlayLayer::returnToMenu))
@@ -57,7 +96,6 @@ class $modify(MyPlayLayer, PlayLayer) {
             return;
         }
 
-        log::info("[No End Screen]: Showing invisible exit button");
         g_invisibleExitButton = CCMenuItemSpriteExtra::create(
             tintSprite,
             this,
@@ -72,38 +110,45 @@ class $modify(MyPlayLayer, PlayLayer) {
     }
 
     void onInvisibleButtonPressed(CCObject*) {
-        log::info("[No End Screen]: Invisible button clicked — exiting level");
         returnToMenu();
     }
 
     void returnToMenu() {
-        if (!Mod::get()->getSettingValue<bool>("ContinueLevelMusic")) {
-            log::info("[No End Screen]: Restarting menu music");
-            FMODAudioEngine::sharedEngine()->clearAllAudio();
-            GameManager::sharedState()->playMenuMusic();
+        if (!Mod::get()->getSettingValue<bool>("ModEnabled"))
+            return;
+
+        FMODAudioEngine::sharedEngine()->clearAllAudio();
+        GameManager::sharedState()->playMenuMusic();
+
+        std::string destination = Mod::get()->getSettingValue<std::string>("ReturnDestination");
+
+        if (destination.empty()) {
+            destination = "Levels List Screen";
         }
 
-        std::string destination = Mod::get()->getSettingValue<std::string>("Return Destination");
+        GJGameLevel* lastLevel = m_level;
+
         if (destination == "Levels List Screen") {
-            CCDirector::sharedDirector()->popScene();
+            if (lastLevel && static_cast<int>(lastLevel->m_levelType) == 1) {
+                auto searchObj = GJSearchObject::create(static_cast<SearchType>(2));
+                CCDirector::sharedDirector()->replaceScene(LevelBrowserLayer::scene(searchObj));
+            } else {
+                CCDirector::sharedDirector()->popScene();
+            }
         }
         else if (destination == "Current Level Screen") {
-            auto scene = GJGarageLayer::scene(); // Fallback
-            if (auto pl = GameManager::sharedState()->getPlayLayer()) {
-                if (auto level = pl->m_level) {
-                    scene = LevelInfoLayer::scene(level, false);
-                }
+            if (lastLevel) {
+                CCDirector::sharedDirector()->replaceScene(LevelInfoLayer::scene(lastLevel, false));
+            } else {
+                CCDirector::sharedDirector()->popScene();
             }
-            CCDirector::sharedDirector()->replaceScene(scene);
         }
         else {
-            log::warn("[No End Screen]: Unknown destination '{}'", destination);
             CCDirector::sharedDirector()->popScene();
         }
     }
 
     ~MyPlayLayer() {
         g_inPracticeMode = false;
-        log::info("[No End Screen]: Exiting PlayLayer — Practice Mode reset");
     }
 };

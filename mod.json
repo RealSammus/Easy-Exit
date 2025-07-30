@@ -6,16 +6,22 @@
 		"mac": "2.2074",
 		"ios": "2.2074"
 	},
-	"id": "sam.easy_exit",
+	"id": "sammus.easy_exit",
 	"name": "Easy Exit",
-	"version": "v1.0.1",
-	"developer": "Sam",
+	"version": "v1.0.2",
+	"developer": "Sammus",
 	"description": "",
 	"settings": {
-		"ContinueLevelMusic": {
+		"ModEnabled": {
 			"type": "bool",
-			"name": "Continue playing level music",
-			"description": "Continues to play the levels music in the menu (breaks when entering certain menus)",
+			"name": "Enabled",
+			"description": "Enables or disables the mod",
+			"default": true
+		},
+		"ButtonEnabled": {
+			"type": "bool",
+			"name": "Button Enabled",
+			"description": "Enables or disables the pause menu button to open the mod settings",
 			"default": true
 		},
 		"ReturnDestination": {
@@ -73,5 +79,10 @@
 	"links": {
 		"community": "https://discord.gg/JvTAk5rJ2p"
 	},
-	"tags": ["gameplay", "offline", "utility"]
+	"tags": ["gameplay", "offline", "utility"],
+	"resources": {
+		"sprites": [
+			"resources/ModMenuButton.png"
+		]
+	}
 }
