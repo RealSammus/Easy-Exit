@@ -6,10 +6,10 @@
 		"mac": "2.2074",
 		"ios": "2.2074"
 	},
-	"id": "sammus.easy_exit",
+	"id": "sam.easy_exit",
 	"name": "Easy Exit",
 	"version": "v1.0.2",
-	"developer": "Sammus",
+	"developer": "Sam",
 	"description": "",
 	"settings": {
 		"ModEnabled": {
