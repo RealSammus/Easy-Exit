@@ -8,10 +8,14 @@
 	},
 	"id": "sam.easy_exit",
 	"name": "Easy Exit",
-	"version": "v1.0.2",
+	"version": "v1.0.3",
 	"developer": "Sam",
 	"description": "",
 	"settings": {
+		"mod-section": {
+			"type": "title",
+			"name": "Mod Settings"
+		},
 		"ModEnabled": {
 			"type": "bool",
 			"name": "Enabled",
@@ -23,6 +27,10 @@
 			"name": "Button Enabled",
 			"description": "Enables or disables the pause menu button to open the mod settings",
 			"default": true
+		},
+		"return-section": {
+			"type": "title",
+			"name": "Return Settings"
 		},
 		"ReturnDestination": {
 			"type": "string",
@@ -39,7 +47,6 @@
 			"name": "Disabled in practice mode",
 			"description": "Disables the mod from working in practice mode (may break with tinting)",
 			"default": true
-
 		},
 		"AutoReturn": {
 			"type": "bool",
@@ -54,6 +61,73 @@
 			"default": 0.0,
 			"min": 0.0,
 			"max": 5.0,
+			"control": {
+				"slider": true
+			}
+		},
+		"tint-section": {
+			"type": "title",
+			"name": "Tint Settings"
+		},
+		"TintMode": {
+			"type": "string",
+			"name": "Tint Visual",
+			"description": "Choose the type of visual tint when completing a level",
+			"default": "Full Screen",
+			"one-of": [
+				"Full Screen",
+				"Border Glow",
+				"Custom image"
+			]
+		},
+		"CustomTintImage": {
+			"type": "file",
+			"name": "Custom Tint Image",
+			"description": "The image to use when Tint Mode is set to Image",
+			"default": {
+				"win": "",
+				"mac": "",
+				"android": ""
+			},
+			"control": {
+				"dialog": "open",
+				"filters": [
+					{
+						"files": ["*.png", "*.jpg", "*.jpeg", "*.bmp"],
+						"description": "PNG Images"
+					}
+				]
+			}
+		},
+		"TintStyle": {
+			"type": "string",
+			"name": "Tint Animation",
+			"description": "Choose the animation type the tint follows",
+			"default": "Hold",
+			"one-of": [
+				"Hold",
+				"Fade In Hold",
+				"Fade In Out"
+			]
+		},
+		"FadeInDuration": {
+			"type": "float",
+			"name": "Fade In Duration",
+			"description": "How long it takes for the tint to fade in",
+			"default": 0.5,
+			"min": 0.0,
+			"max": 10.0,
+			"control": {
+				"slider": true
+			}
+		},
+		"FadeOutDuration": {
+			"type": "float",
+			"name": "Fade Out Duration",
+			"description": "How long it takes for the tint to fade out",
+			"default": 0.5,
+			"min": 0.0,
+			"max": 10.0,
 			"control": {
 				"slider": true
 			}
@@ -82,7 +156,9 @@
 	"tags": ["gameplay", "offline", "utility"],
 	"resources": {
 		"sprites": [
-			"resources/ModMenuButton.png"
+			"resources/ModMenuButton.png",
+			"resources/BorderGlow.png",
+			"resources/FlashImage.png"
 		]
 	}
 }

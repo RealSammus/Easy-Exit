@@ -1,3 +1,10 @@
+# 1.0.3
+
+- Added titles between mods for better sorting
+- Fixed a practice mode glitch where after turning it on once would break the mod for your entire session
+- Made tint visual options including new edge glow and custom image options
+- Made tint animation options that allow you to adjust fade in and fade out durations
+
 # 1.0.2
 
 - Added an enable and disable button for the mod

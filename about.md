@@ -1,30 +1,20 @@
 # Easy Exit
 
-No more waiting around, just **<cy>tap</c>** the screen to leave a level **<cg>instantly</c>**.
+No more waiting around for the exit menu, just **<cy>tap</c>** the screen to leave a level **<cg>instantly</c>**.
 
 ## <cr>Optional settings:</c>
 
-• **<cg>Enabling</c>** and **<cr>disabling</c>** the mod
+• **<cg>Enabling</c>** and **<cr>Disabling</c>** settings for the mod and menu buttons
 
-• Enabling and disabling the pause menu **<ca>mod settings button</c>**
+• Adjusting **<cd>Return Settings</c>** for where and how to return
 
-• Returning to either the **<cp>Level Screen</c>** or the **<cp>Levels List</c>**
-
-• Disabling the mod when in **<cg>practice mdoe</c>**
-
-• **<cs>Automatic returning</c>** to the menu after beating a level
-
-• **<ca>Time delay</c>** after completing a level before the automatic return
-
-• The **<cg>tint colour</c>** shown when you can click to exit the level
-
-• The **<cy>opacity</c>** of the tint colour shown
+• Adjusting **<co>Tint Visuals</c>** shown before returning from a level
 
 ## <cl>Credits</c>
 
-- **<ca>Firee</c>** - Teaching me about publishing
+• **<ca>Firee</c>** - Teaching me about publishing
 
-- **<cj>erymanthus</c>** - Bug testing
+• **<cj>erymanthus</c>** - Bug testing
 
 ## Support
 
