@@ -3,10 +3,6 @@
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/binding/GameManager.hpp>
 #include <Geode/binding/GJGameLevel.hpp>
-#include <Geode/binding/LevelInfoLayer.hpp>
-#include <Geode/binding/LevelBrowserLayer.hpp>
-#include <Geode/binding/GJSearchObject.hpp>
-#include <Geode/binding/FMODAudioEngine.hpp>
 #include <Geode/ui/GeodeUI.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <filesystem>
@@ -15,7 +11,6 @@ using namespace geode::prelude;
 using namespace cocos2d;
 
 CCMenuItemSpriteExtra* g_invisibleExitButton = nullptr;
-bool g_inPracticeMode = false;
 
 class $modify(MyPauseLayer, PauseLayer) {
     void customSetup() {
@@ -28,30 +23,20 @@ class $modify(MyPauseLayer, PauseLayer) {
             PlayLayer::get()->m_level->m_levelType == GJLevelType::Editor)
             return;
 
-        auto winSize = CCDirector::sharedDirector()->getWinSize();
-
         auto btn = geode::cocos::CCMenuItemExt::createSpriteExtraWithFilename(
             "ModMenuButton.png"_spr,
-            1.f,
+            .6f,
             [](CCObject*) {
                 openSettingsPopup(Mod::get());
             }
         );
+        btn->setID("easy-exit-button"_spr);
 
-        btn->setPosition({ winSize.width - 523.f, winSize.height - 44.f });
-
-        auto menu = CCMenu::create();
-        menu->setPosition({ 0.f, 0.f });
-        menu->addChild(btn);
-        menu->setZOrder(9999);
-        btn->setZOrder(9999);
-        this->addChild(menu, 9999);
-    }
-
-    void onPracticeMode(CCObject* sender) {
-        PauseLayer::onPracticeMode(sender);
-        bool newState = GameManager::sharedState()->getGameVariable("0049");
-        g_inPracticeMode = newState;
+        if (auto rightMenu = typeinfo_cast<CCMenu*>(this->getChildByIDRecursive("right-button-menu"))) {
+            rightMenu->removeChild(btn, false);
+            rightMenu->addChild(btn, 9999);
+            rightMenu->updateLayout();
+        }
     }
 };
 
@@ -67,13 +52,13 @@ class $modify(MyPlayLayer, PlayLayer) {
             return;
         }
 
-        if (Mod::get()->getSettingValue<bool>("PracticeReturn") && g_inPracticeMode) {
+        if (Mod::get()->getSettingValue<bool>("PracticeReturn") &&
+            GameManager::sharedState()->getGameVariable("0049")) {
             PlayLayer::levelComplete();
             return;
         }
 
         PlayLayer::levelComplete();
-        g_inPracticeMode = false;
 
         auto winSize = CCDirector::sharedDirector()->getWinSize();
         ccColor3B visualColor = Mod::get()->getSettingValue<ccColor3B>("TintColor");
@@ -90,7 +75,7 @@ class $modify(MyPlayLayer, PlayLayer) {
             sprite->setTextureRect({ 0, 0, winSize.width, winSize.height });
         } 
         else if (visualMode == "Colored Edge Glow") {
-            sprite = CCSprite::create("BorderGlow.png"_spr);
+            sprite = CCSprite::create("EdgeGlow.png"_spr);
             if (sprite) {
                 sprite->setScaleX(winSize.width / sprite->getContentSize().width);
                 sprite->setScaleY(winSize.height / sprite->getContentSize().height);
@@ -98,21 +83,20 @@ class $modify(MyPlayLayer, PlayLayer) {
         } 
         else if (visualMode == "Custom Image") {
             auto path = Mod::get()->getSettingValue<std::filesystem::path>("CustomTintImage");
-
+        
             if (!path.empty()) {
                 sprite = CCSprite::create(path.string().c_str());
-                if (!sprite) {
-                    sprite = CCSprite::create("FallbackImage.png"_spr);
+                if (sprite) {
+                    sprite->setScaleX(winSize.width / sprite->getContentSize().width);
+                    sprite->setScaleY(winSize.height / sprite->getContentSize().height);
                 }
-            } else {
-                sprite = CCSprite::create("FallbackImage.png"_spr);
             }
-
-            if (sprite) {
-                sprite->setScaleX(winSize.width / sprite->getContentSize().width);
-                sprite->setScaleY(winSize.height / sprite->getContentSize().height);
+        
+            if (!sprite) {
+                sprite = CCSprite::create();
+                sprite->setTextureRect({ 0, 0, winSize.width, winSize.height });
             }
-        }
+        }        
 
         if (sprite) {
             sprite->setAnchorPoint({ 0.f, 0.f });
@@ -143,7 +127,6 @@ class $modify(MyPlayLayer, PlayLayer) {
 
             addExitButton(sprite);
 
-            // Automatic return after delay
             bool autoLeave = Mod::get()->getSettingValue<bool>("AutoReturn");
             float returnDelay = Mod::get()->getSettingValue<float>("AutoReturnDelay");
 
@@ -155,8 +138,6 @@ class $modify(MyPlayLayer, PlayLayer) {
                     )
                 );
             }
-        } else {
-            log::error("No sprite could be loaded for visual mode '{}'", visualMode);
         }
     }
 
@@ -183,35 +164,6 @@ class $modify(MyPlayLayer, PlayLayer) {
         if (!Mod::get()->getSettingValue<bool>("ModEnabled"))
             return;
 
-        FMODAudioEngine::sharedEngine()->clearAllAudio();
-        GameManager::sharedState()->playMenuMusic();
-
-        std::string destination = Mod::get()->getSettingValue<std::string>("ReturnDestination");
-        if (destination.empty()) destination = "Levels List Screen";
-
-        GJGameLevel* lastLevel = m_level;
-
-        if (destination == "Levels List Screen") {
-            if (lastLevel && static_cast<int>(lastLevel->m_levelType) == 1) {
-                auto searchObj = GJSearchObject::create(static_cast<SearchType>(2));
-                CCDirector::sharedDirector()->replaceScene(LevelBrowserLayer::scene(searchObj));
-            } else {
-                CCDirector::sharedDirector()->popScene();
-            }
-        }
-        else if (destination == "Current Level Screen") {
-            if (lastLevel) {
-                CCDirector::sharedDirector()->replaceScene(LevelInfoLayer::scene(lastLevel, false));
-            } else {
-                CCDirector::sharedDirector()->popScene();
-            }
-        }
-        else {
-            CCDirector::sharedDirector()->popScene();
-        }
-    }
-
-    ~MyPlayLayer() {
-        g_inPracticeMode = false;
+        this->onQuit();
     }
 };

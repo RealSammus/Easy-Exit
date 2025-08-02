@@ -16,6 +16,8 @@ No more waiting around for the exit menu, just **<cy>tap</c>** the screen to lea
 
 • **<cj>erymanthus</c>** - Bug testing
 
+• **<cd>kam.dev_</c>** - Bug testing
+
 ## Support
 
 If you like this mod, consider **<co>supporting me</c>** by joining my **[Discord Server](https://discord.gg/JvTAk5rJ2p)**!

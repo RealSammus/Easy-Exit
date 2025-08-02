@@ -1,3 +1,9 @@
+# 1.0.4
+
+- Removed return destination due to issues and mod now always returns to last menu
+- Moved the mod settings button in the pause menu to fit in the buttons stack so it works on all aspect ratios
+- Changed practice mode detection system
+
 # 1.0.3
 
 - Added titles between mods for better sorting
