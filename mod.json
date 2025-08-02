@@ -65,24 +65,24 @@
 				"slider": true
 			}
 		},
-		"tint-section": {
+		"visual-section": {
 			"type": "title",
-			"name": "Tint Settings"
+			"name": "Visual Settings"
 		},
 		"TintMode": {
 			"type": "string",
-			"name": "Tint Visual",
-			"description": "Choose the type of visual tint when completing a level",
+			"name": "Visual",
+			"description": "Choose the type of visual to display when completing a level",
 			"default": "Full Screen",
 			"one-of": [
-				"Full Screen",
-				"Border Glow",
-				"Custom image"
+				"Full Screen Color",
+				"Colored Edge Glow",
+				"Custom Image"
 			]
 		},
 		"CustomTintImage": {
 			"type": "file",
-			"name": "Custom Tint Image",
+			"name": "Custom Image",
 			"description": "The image to use when Tint Mode is set to Image",
 			"default": {
 				"win": "",
@@ -94,15 +94,15 @@
 				"filters": [
 					{
 						"files": ["*.png", "*.jpg", "*.jpeg", "*.bmp"],
-						"description": "PNG Images"
+						"description": ".PNG, .JPG, .JPEG or .BMP"
 					}
 				]
 			}
 		},
 		"TintStyle": {
 			"type": "string",
-			"name": "Tint Animation",
-			"description": "Choose the animation type the tint follows",
+			"name": "Visual Animation",
+			"description": "Choose the animation type the visual follows",
 			"default": "Hold",
 			"one-of": [
 				"Hold",
@@ -113,7 +113,7 @@
 		"FadeInDuration": {
 			"type": "float",
 			"name": "Fade In Duration",
-			"description": "How long it takes for the tint to fade in",
+			"description": "How long it takes for the visual to fade in",
 			"default": 0.5,
 			"min": 0.0,
 			"max": 10.0,
@@ -124,7 +124,7 @@
 		"FadeOutDuration": {
 			"type": "float",
 			"name": "Fade Out Duration",
-			"description": "How long it takes for the tint to fade out",
+			"description": "How long it takes for the visual to fade out",
 			"default": 0.5,
 			"min": 0.0,
 			"max": 10.0,
@@ -134,13 +134,13 @@
 		},
 		"TintColor": {
 			"type": "color",
-			"name": "Tint Color",
+			"name": "Visual Color",
 			"description": "The color to tint when you are able to click to leave the level",
 			"default": "#ffffff"
 		},
 		"TintOpacity": {
 			"type": "float",
-			"name": "Tint Opacity",
+			"name": "Visual Opacity",
 			"description": "How visible the tint should be (0 = transparent, 1 = fully visible)",
 			"default": 0.25,
 			"min": 0.0,

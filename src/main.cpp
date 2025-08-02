@@ -76,17 +76,28 @@ class $modify(MyPlayLayer, PlayLayer) {
         g_inPracticeMode = false;
 
         auto winSize = CCDirector::sharedDirector()->getWinSize();
-        ccColor3B tintColor = Mod::get()->getSettingValue<ccColor3B>("TintColor");
-        float opacityValue = Mod::get()->getSettingValue<float>("TintOpacity");
-        std::string tintMode = Mod::get()->getSettingValue<std::string>("TintMode");
-        std::string tintStyle = Mod::get()->getSettingValue<std::string>("TintStyle");
+        ccColor3B visualColor = Mod::get()->getSettingValue<ccColor3B>("TintColor");
+        float visualOpacity = Mod::get()->getSettingValue<float>("TintOpacity");
+        std::string visualMode = Mod::get()->getSettingValue<std::string>("TintMode");
+        std::string visualStyle = Mod::get()->getSettingValue<std::string>("TintStyle");
         float fadeIn = Mod::get()->getSettingValue<float>("FadeInDuration");
         float fadeOut = Mod::get()->getSettingValue<float>("FadeOutDuration");
 
-        if (tintMode == "Custom image") {
-            auto path = Mod::get()->getSettingValue<std::filesystem::path>("CustomTintImage");
+        CCSprite* sprite = nullptr;
 
-            CCSprite* sprite = nullptr;
+        if (visualMode == "Full Screen Color") {
+            sprite = CCSprite::create();
+            sprite->setTextureRect({ 0, 0, winSize.width, winSize.height });
+        } 
+        else if (visualMode == "Colored Edge Glow") {
+            sprite = CCSprite::create("BorderGlow.png"_spr);
+            if (sprite) {
+                sprite->setScaleX(winSize.width / sprite->getContentSize().width);
+                sprite->setScaleY(winSize.height / sprite->getContentSize().height);
+            }
+        } 
+        else if (visualMode == "Custom Image") {
+            auto path = Mod::get()->getSettingValue<std::filesystem::path>("CustomTintImage");
 
             if (!path.empty()) {
                 sprite = CCSprite::create(path.string().c_str());
@@ -98,36 +109,54 @@ class $modify(MyPlayLayer, PlayLayer) {
             }
 
             if (sprite) {
-                sprite->setColor(tintColor);
-                sprite->setOpacity(0);
-                sprite->setAnchorPoint({ 0.f, 0.f });
                 sprite->setScaleX(winSize.width / sprite->getContentSize().width);
                 sprite->setScaleY(winSize.height / sprite->getContentSize().height);
-                sprite->setPosition({ 0.f, 0.f });
-                this->addChild(sprite, 9998);
-
-                CCActionInterval* fadeAction = nullptr;
-                if (tintStyle == "Hold") {
-                    sprite->setOpacity(static_cast<GLubyte>(opacityValue * 255));
-                } else if (tintStyle == "Fade In Hold") {
-                    fadeAction = CCFadeTo::create(fadeIn, static_cast<GLubyte>(opacityValue * 255));
-                } else if (tintStyle == "Fade In Out") {
-                    fadeAction = CCSequence::create(
-                        CCFadeTo::create(fadeIn, static_cast<GLubyte>(opacityValue * 255)),
-                        CCDelayTime::create(0.3f),
-                        CCFadeTo::create(fadeOut, 0),
-                        CCHide::create(),
-                        nullptr
-                    );
-                }
-
-                if (fadeAction)
-                    sprite->runAction(fadeAction);
-
-                addExitButton(sprite);
-            } else {
-                log::error("No sprite could be loaded for custom image mode.");
             }
+        }
+
+        if (sprite) {
+            sprite->setAnchorPoint({ 0.f, 0.f });
+            sprite->setPosition({ 0.f, 0.f });
+            sprite->setColor(visualColor);
+            sprite->setOpacity(0);
+            this->addChild(sprite, 9998);
+
+            CCActionInterval* fadeAction = nullptr;
+
+            if (visualStyle == "Hold") {
+                sprite->setOpacity(static_cast<GLubyte>(visualOpacity * 255));
+            } 
+            else if (visualStyle == "Fade In Hold") {
+                fadeAction = CCFadeTo::create(fadeIn, static_cast<GLubyte>(visualOpacity * 255));
+            } 
+            else if (visualStyle == "Fade In Out") {
+                fadeAction = CCSequence::create(
+                    CCFadeTo::create(fadeIn, static_cast<GLubyte>(visualOpacity * 255)),
+                    CCDelayTime::create(0.3f),
+                    CCFadeTo::create(fadeOut, 0),
+                    nullptr
+                );
+            }
+
+            if (fadeAction)
+                sprite->runAction(fadeAction);
+
+            addExitButton(sprite);
+
+            // Automatic return after delay
+            bool autoLeave = Mod::get()->getSettingValue<bool>("AutoReturn");
+            float returnDelay = Mod::get()->getSettingValue<float>("AutoReturnDelay");
+
+            if (autoLeave) {
+                this->runAction(
+                    CCSequence::createWithTwoActions(
+                        CCDelayTime::create(returnDelay),
+                        CCCallFunc::create(this, callfunc_selector(MyPlayLayer::returnToMenu))
+                    )
+                );
+            }
+        } else {
+            log::error("No sprite could be loaded for visual mode '{}'", visualMode);
         }
     }
 
