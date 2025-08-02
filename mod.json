@@ -11,9 +11,6 @@
 	"version": "v1.0.3",
 	"developer": "Sam",
 	"description": "",
-	"dependencies": {
-		"geode.node-ids": "*"
-	},
 	"settings": {
 		"mod-section": {
 			"type": "title",
