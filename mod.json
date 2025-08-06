@@ -188,7 +188,7 @@
 			"type": "string",
 			"name": "Audio Settings",
 			"description": "Choose how the completion audio functions",
-			"default": "Hold",
+			"default": "Continue play",
 			"one-of": [
 				"Continue play",
 				"Stop on exit"

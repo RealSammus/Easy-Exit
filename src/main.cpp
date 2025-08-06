@@ -12,6 +12,7 @@ using namespace geode::prelude;
 using namespace cocos2d;
 
 FMOD::Channel* g_completionAudioChannel = nullptr;
+bool g_practiceWasUsed = false;
 
 class $modify(MyPauseLayer, PauseLayer) {
     void customSetup() {
@@ -35,25 +36,33 @@ class $modify(MyPauseLayer, PauseLayer) {
             rightMenu->updateLayout();
         }
     }
+
+    void onPracticeMode(CCObject* sender); // declared here
 };
 
 class $modify(MyPlayLayer, PlayLayer) {
     struct Fields {
         CCMenuItemSpriteExtra* m_invisibleExitButton = nullptr;
     };
+
+    void onEnterTransitionDidFinish() override {
+        PlayLayer::onEnterTransitionDidFinish();
+
+        g_practiceWasUsed = false; // Reset flag at the start of every level
+        log::info("[Easy Exit]: Reset g_practiceWasUsed on level start.");
+    }
+    
     void levelComplete() {
         if (!Mod::get()->getSettingValue<bool>("ModEnabled")) {
             PlayLayer::levelComplete();
             return;
         }
 
-        if (Mod::get()->getSettingValue<bool>("PracticeReturn") &&
-            GameManager::sharedState()->getGameVariable("0049")) {
+        if (Mod::get()->getSettingValue<bool>("PracticeReturn") && g_practiceWasUsed) {
+            log::info("Practice was used and PracticeReturn is enabled — skipping mod.");
             PlayLayer::levelComplete();
             return;
         }
-
-        PlayLayer::levelComplete();
 
         auto winSize = CCDirector::sharedDirector()->getWinSize();
         ccColor3B visualColor = Mod::get()->getSettingValue<ccColor3B>("TintColor");
@@ -78,7 +87,7 @@ class $modify(MyPlayLayer, PlayLayer) {
         } 
         else if (visualMode == "Custom Image") {
             auto path = Mod::get()->getSettingValue<std::filesystem::path>("CustomTintImage");
-        
+
             if (!path.empty()) {
                 sprite = CCSprite::create(path.string().c_str());
                 if (sprite) {
@@ -86,7 +95,7 @@ class $modify(MyPlayLayer, PlayLayer) {
                     sprite->setScaleY(winSize.height / sprite->getContentSize().height);
                 }
             }
-        
+
             if (!sprite) {
                 sprite = CCSprite::create();
                 sprite->setTextureRect({ 0, 0, winSize.width, winSize.height });
@@ -163,14 +172,14 @@ class $modify(MyPlayLayer, PlayLayer) {
 
     void addExitButton(CCNode* ref) {
         auto winSize = CCDirector::sharedDirector()->getWinSize();
-    
+
         m_fields->m_invisibleExitButton = CCMenuItemSpriteExtra::create(
             ref,
             this,
             menu_selector(MyPlayLayer::onInvisibleButtonPressed)
         );
         m_fields->m_invisibleExitButton->setPosition(winSize.width / 2, winSize.height / 2);
-    
+
         auto menu = CCMenu::create();
         menu->setPosition({ 0.f, 0.f });
         menu->addChild(m_fields->m_invisibleExitButton);
@@ -182,11 +191,13 @@ class $modify(MyPlayLayer, PlayLayer) {
     }
 
     void returnToMenu() {
+        g_practiceWasUsed = false;
         if (!Mod::get()->getSettingValue<bool>("ModEnabled"))
             return;
 
         this->onQuit();
     }
+
     void onQuit() {
         if (Mod::get()->getSettingValue<std::string>("AudioStyle") == "Stop on exit") {
             if (g_completionAudioChannel) {
@@ -197,7 +208,17 @@ class $modify(MyPlayLayer, PlayLayer) {
                 g_completionAudioChannel = nullptr;
             }
         }
-    
+
         PlayLayer::onQuit();
     }
 };
+
+// Function definition outside of class
+void MyPauseLayer::onPracticeMode(CCObject* sender) {
+    PauseLayer::onPracticeMode(sender);
+
+    auto pl = PlayLayer::get();
+    if (pl && pl->m_isPracticeMode) {
+        g_practiceWasUsed = true;
+    }
+}
