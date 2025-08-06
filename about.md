@@ -6,7 +6,7 @@ No more waiting around for the exit menu, just **<cy>tap</c>** the screen to lea
 
 • **<cg>Enabling</c>** and **<cr>Disabling</c>** settings for the mod and menu buttons
 
-• Adjusting **<cd>Return Settings</c>** for where and how to return
+• Adjusting **<cd>Return Settings</c>** for how to return
 
 • Adjusting **<co>Tint Visuals</c>** shown before returning from a level
 
@@ -17,6 +17,8 @@ No more waiting around for the exit menu, just **<cy>tap</c>** the screen to lea
 • **<cj>erymanthus</c>** - Bug testing
 
 • **<cd>kam.dev_</c>** - Bug testing
+
+• **[Shenirem](user:25514001)** - Bug testing and suggestions
 
 ## Support
 

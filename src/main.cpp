@@ -3,6 +3,7 @@
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/binding/GameManager.hpp>
 #include <Geode/binding/GJGameLevel.hpp>
+#include <Geode/binding/FMODAudioEngine.hpp>
 #include <Geode/ui/GeodeUI.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <filesystem>
@@ -10,17 +11,13 @@
 using namespace geode::prelude;
 using namespace cocos2d;
 
-CCMenuItemSpriteExtra* g_invisibleExitButton = nullptr;
+FMOD::Channel* g_completionAudioChannel = nullptr;
 
 class $modify(MyPauseLayer, PauseLayer) {
     void customSetup() {
         PauseLayer::customSetup();
 
         if (!Mod::get()->getSettingValue<bool>("ButtonEnabled"))
-            return;
-
-        if (PlayLayer::get() && PlayLayer::get()->m_level &&
-            PlayLayer::get()->m_level->m_levelType == GJLevelType::Editor)
             return;
 
         auto btn = geode::cocos::CCMenuItemExt::createSpriteExtraWithFilename(
@@ -41,13 +38,11 @@ class $modify(MyPauseLayer, PauseLayer) {
 };
 
 class $modify(MyPlayLayer, PlayLayer) {
+    struct Fields {
+        CCMenuItemSpriteExtra* m_invisibleExitButton = nullptr;
+    };
     void levelComplete() {
         if (!Mod::get()->getSettingValue<bool>("ModEnabled")) {
-            PlayLayer::levelComplete();
-            return;
-        }
-
-        if (m_level && m_level->m_levelType == GJLevelType::Editor) {
             PlayLayer::levelComplete();
             return;
         }
@@ -138,23 +133,49 @@ class $modify(MyPlayLayer, PlayLayer) {
                     )
                 );
             }
+
+            auto audioPath = Mod::get()->getSettingValue<std::filesystem::path>("CustomCompletionAudio");
+            float volume = Mod::get()->getSettingValue<float>("AudioVolume");
+            float speed = Mod::get()->getSettingValue<float>("AudioSpeed");
+            std::string audioStyle = Mod::get()->getSettingValue<std::string>("AudioStyle");
+
+            if (!audioPath.empty()) {
+                FMOD::System* system = FMODAudioEngine::sharedEngine()->m_system;
+                FMOD::Sound* sound = nullptr;
+
+                std::string pathStr = audioPath.string();
+
+                if (system->createSound(pathStr.c_str(), FMOD_DEFAULT, nullptr, &sound) == FMOD_OK) {
+                    if (system->playSound(sound, nullptr, false, &g_completionAudioChannel) == FMOD_OK) {
+                        if (g_completionAudioChannel) {
+                            g_completionAudioChannel->setVolume(volume);
+
+                            float baseFreq;
+                            if (g_completionAudioChannel->getFrequency(&baseFreq) == FMOD_OK) {
+                                g_completionAudioChannel->setFrequency(baseFreq * speed);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
     void addExitButton(CCNode* ref) {
         auto winSize = CCDirector::sharedDirector()->getWinSize();
-        g_invisibleExitButton = CCMenuItemSpriteExtra::create(
+    
+        m_fields->m_invisibleExitButton = CCMenuItemSpriteExtra::create(
             ref,
             this,
             menu_selector(MyPlayLayer::onInvisibleButtonPressed)
         );
-        g_invisibleExitButton->setPosition(winSize.width / 2, winSize.height / 2);
-
+        m_fields->m_invisibleExitButton->setPosition(winSize.width / 2, winSize.height / 2);
+    
         auto menu = CCMenu::create();
-        menu->setPosition({ 0, 0 });
-        menu->addChild(g_invisibleExitButton);
+        menu->setPosition({ 0.f, 0.f });
+        menu->addChild(m_fields->m_invisibleExitButton);
         this->addChild(menu, 9999);
-    }
+    }     
 
     void onInvisibleButtonPressed(CCObject*) {
         returnToMenu();
@@ -165,5 +186,18 @@ class $modify(MyPlayLayer, PlayLayer) {
             return;
 
         this->onQuit();
+    }
+    void onQuit() {
+        if (Mod::get()->getSettingValue<std::string>("AudioStyle") == "Stop on exit") {
+            if (g_completionAudioChannel) {
+                bool isPlaying = false;
+                g_completionAudioChannel->isPlaying(&isPlaying);
+                if (isPlaying)
+                    g_completionAudioChannel->stop();
+                g_completionAudioChannel = nullptr;
+            }
+        }
+    
+        PlayLayer::onQuit();
     }
 };

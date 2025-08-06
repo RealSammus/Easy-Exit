@@ -1,3 +1,9 @@
+# 1.0.5
+
+- Made it so the mod works within the editor
+- Added a new custom audio section in settings where you can customise completion audio, volume and speed
+- Made the invisible exit button no longer a global
+
 # 1.0.4
 
 - Removed return destination due to issues and mod now always returns to last menu

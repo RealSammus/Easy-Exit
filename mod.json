@@ -55,9 +55,9 @@
 				"slider": true
 			}
 		},
-		"visual-section": {
+		"customization-section": {
 			"type": "title",
-			"name": "Visual Settings"
+			"name": "Customization Settings"
 		},
 		"TintMode": {
 			"type": "string",
@@ -138,7 +138,63 @@
 			"control": {
 				"slider": true
 			}
+		},
+		"audio-section": {
+			"type": "title",
+			"name": "Audio Settings"
+		},
+		"CustomCompletionAudio": {
+			"type": "file",
+			"name": "Level Completion Audio",
+			"description": "The audio to play when you complete a level (Leave blank if you do not want a custom audio to play upon completing a level)",
+			"default": {
+				"win": "",
+				"mac": "",
+				"android": ""
+			},
+			"control": {
+				"dialog": "open",
+				"filters": [
+					{
+						"files": ["*.mp3", "*.wav"],
+						"description": ".mp3 or .wav"
+					}
+				]
+			}
+		},
+		"AudioVolume": {
+			"type": "float",
+			"name": "Audio Volume",
+			"description": "How loud the completion audio is (0 = silent, 10 = loud)",
+			"default": 1.0,
+			"min": 0.0,
+			"max": 10.0,
+			"control": {
+				"slider": true
+			}
+		},
+		"AudioSpeed": {
+			"type": "float",
+			"name": "Audio Speed",
+			"description": "How fast the completion audio is",
+			"default": 1.0,
+			"min": 0.0,
+			"max": 2.0,
+			"control": {
+				"slider": true
+			}
+		},
+		"AudioStyle": {
+			"type": "string",
+			"name": "Audio Settings",
+			"description": "Choose how the completion audio functions",
+			"default": "Hold",
+			"one-of": [
+				"Continue play",
+				"Stop on exit"
+			]
 		}
+
 	},
 	"links": {
 		"community": "https://discord.gg/JvTAk5rJ2p"
