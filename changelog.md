@@ -1,3 +1,7 @@
+# 1.0.7
+
+- Fixed levels not being completed after exiting
+
 # 1.0.6
 
 - Fixed an issue where the mod wouldn't work if you had disabled in practice mode enabled

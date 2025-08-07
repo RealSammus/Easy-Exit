@@ -37,7 +37,7 @@ class $modify(MyPauseLayer, PauseLayer) {
         }
     }
 
-    void onPracticeMode(CCObject* sender); // declared here
+    void onPracticeMode(CCObject* sender);
 };
 
 class $modify(MyPlayLayer, PlayLayer) {
@@ -47,11 +47,10 @@ class $modify(MyPlayLayer, PlayLayer) {
 
     void onEnterTransitionDidFinish() override {
         PlayLayer::onEnterTransitionDidFinish();
-
-        g_practiceWasUsed = false; // Reset flag at the start of every level
+        g_practiceWasUsed = false;
         log::info("[Easy Exit]: Reset g_practiceWasUsed on level start.");
     }
-    
+
     void levelComplete() {
         if (!Mod::get()->getSettingValue<bool>("ModEnabled")) {
             PlayLayer::levelComplete();
@@ -63,6 +62,11 @@ class $modify(MyPlayLayer, PlayLayer) {
             PlayLayer::levelComplete();
             return;
         }
+
+        // Count level as completed
+        PlayLayer::levelComplete();
+        log::info("[Easy Exit]: Level complete (counted).");
+        g_practiceWasUsed = false;
 
         auto winSize = CCDirector::sharedDirector()->getWinSize();
         ccColor3B visualColor = Mod::get()->getSettingValue<ccColor3B>("TintColor");
@@ -77,17 +81,14 @@ class $modify(MyPlayLayer, PlayLayer) {
         if (visualMode == "Full Screen Color") {
             sprite = CCSprite::create();
             sprite->setTextureRect({ 0, 0, winSize.width, winSize.height });
-        } 
-        else if (visualMode == "Colored Edge Glow") {
+        } else if (visualMode == "Colored Edge Glow") {
             sprite = CCSprite::create("EdgeGlow.png"_spr);
             if (sprite) {
                 sprite->setScaleX(winSize.width / sprite->getContentSize().width);
                 sprite->setScaleY(winSize.height / sprite->getContentSize().height);
             }
-        } 
-        else if (visualMode == "Custom Image") {
+        } else if (visualMode == "Custom Image") {
             auto path = Mod::get()->getSettingValue<std::filesystem::path>("CustomTintImage");
-
             if (!path.empty()) {
                 sprite = CCSprite::create(path.string().c_str());
                 if (sprite) {
@@ -95,12 +96,11 @@ class $modify(MyPlayLayer, PlayLayer) {
                     sprite->setScaleY(winSize.height / sprite->getContentSize().height);
                 }
             }
-
             if (!sprite) {
                 sprite = CCSprite::create();
                 sprite->setTextureRect({ 0, 0, winSize.width, winSize.height });
             }
-        }        
+        }
 
         if (sprite) {
             sprite->setAnchorPoint({ 0.f, 0.f });
@@ -113,11 +113,9 @@ class $modify(MyPlayLayer, PlayLayer) {
 
             if (visualStyle == "Hold") {
                 sprite->setOpacity(static_cast<GLubyte>(visualOpacity * 255));
-            } 
-            else if (visualStyle == "Fade In Hold") {
+            } else if (visualStyle == "Fade In Hold") {
                 fadeAction = CCFadeTo::create(fadeIn, static_cast<GLubyte>(visualOpacity * 255));
-            } 
-            else if (visualStyle == "Fade In Out") {
+            } else if (visualStyle == "Fade In Out") {
                 fadeAction = CCSequence::create(
                     CCFadeTo::create(fadeIn, static_cast<GLubyte>(visualOpacity * 255)),
                     CCDelayTime::create(0.3f),
@@ -158,7 +156,6 @@ class $modify(MyPlayLayer, PlayLayer) {
                     if (system->playSound(sound, nullptr, false, &g_completionAudioChannel) == FMOD_OK) {
                         if (g_completionAudioChannel) {
                             g_completionAudioChannel->setVolume(volume);
-
                             float baseFreq;
                             if (g_completionAudioChannel->getFrequency(&baseFreq) == FMOD_OK) {
                                 g_completionAudioChannel->setFrequency(baseFreq * speed);
@@ -184,7 +181,7 @@ class $modify(MyPlayLayer, PlayLayer) {
         menu->setPosition({ 0.f, 0.f });
         menu->addChild(m_fields->m_invisibleExitButton);
         this->addChild(menu, 9999);
-    }     
+    }
 
     void onInvisibleButtonPressed(CCObject*) {
         returnToMenu();
@@ -211,12 +208,14 @@ class $modify(MyPlayLayer, PlayLayer) {
 
         PlayLayer::onQuit();
     }
+
+    ~MyPlayLayer() {
+        g_practiceWasUsed = false;
+    }
 };
 
-// Function definition outside of class
 void MyPauseLayer::onPracticeMode(CCObject* sender) {
     PauseLayer::onPracticeMode(sender);
-
     auto pl = PlayLayer::get();
     if (pl && pl->m_isPracticeMode) {
         g_practiceWasUsed = true;
