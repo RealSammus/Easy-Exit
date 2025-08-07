@@ -14,7 +14,7 @@ No more waiting around for the exit menu, just **<cy>tap</c>** the screen to lea
 
 • **<ca>Firee</c>** - Teaching me about publishing
 
-• **<cj>erymanthus</c>** - Bug testing
+• **[erymanthus](user:1941705)** - Bug testing
 
 • **<cd>kam.dev_</c>** - Bug testing
 

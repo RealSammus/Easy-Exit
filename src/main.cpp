@@ -48,7 +48,6 @@ class $modify(MyPlayLayer, PlayLayer) {
     void onEnterTransitionDidFinish() override {
         PlayLayer::onEnterTransitionDidFinish();
         g_practiceWasUsed = false;
-        log::info("[Easy Exit]: Reset g_practiceWasUsed on level start.");
     }
 
     void levelComplete() {
@@ -58,14 +57,11 @@ class $modify(MyPlayLayer, PlayLayer) {
         }
 
         if (Mod::get()->getSettingValue<bool>("PracticeReturn") && g_practiceWasUsed) {
-            log::info("Practice was used and PracticeReturn is enabled — skipping mod.");
             PlayLayer::levelComplete();
             return;
         }
 
-        // Count level as completed
         PlayLayer::levelComplete();
-        log::info("[Easy Exit]: Level complete (counted).");
         g_practiceWasUsed = false;
 
         auto winSize = CCDirector::sharedDirector()->getWinSize();

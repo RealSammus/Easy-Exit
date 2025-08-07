@@ -1,3 +1,8 @@
+# 1.0.8
+
+- Text fixes
+- Log and comment lines removal
+
 # 1.0.7
 
 - Fixed levels not being completed after exiting
