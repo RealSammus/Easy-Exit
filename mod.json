@@ -8,9 +8,15 @@
 	},
 	"id": "sam.easy_exit",
 	"name": "Easy Exit",
-	"version": "v1.0.8",
+	"version": "v1.0.9",
 	"developer": "Sam",
 	"description": "",
+	"dependencies": {
+		"user95401.gif-sprites": {
+			"version": ">=v2.0.0",
+			"importance": "recommended"
+		}
+	},
 	"settings": {
 		"mod-section": {
 			"type": "title",
@@ -83,8 +89,8 @@
 				"dialog": "open",
 				"filters": [
 					{
-						"files": ["*.png", "*.jpg", "*.jpeg", "*.bmp"],
-						"description": ".PNG, .JPG, .JPEG or .BMP"
+						"files": ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.gif"],
+						"description": ".PNG, .JPG, .JPEG, .BMP or .GIF"
 					}
 				]
 			}
@@ -185,14 +191,16 @@
 			}
 		},
 		"AudioStyle": {
-			"type": "string",
-			"name": "Audio Settings",
-			"description": "Choose how the completion audio functions",
-			"default": "Continue play",
-			"one-of": [
-				"Continue play",
-				"Stop on exit"
-			]
+			"type": "bool",
+			"name": "Stop on exit",
+			"description": "If the music stops playing when you exit the level",
+			"default": false
+		},
+		"PauseNormalMusic": {
+			"type": "bool",
+			"name": "Pause normal level music",
+			"description": "Pauses the levels music when completing a level",
+			"default": false
 		}
 
 	},

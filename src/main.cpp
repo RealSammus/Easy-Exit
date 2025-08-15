@@ -13,6 +13,18 @@ using namespace cocos2d;
 
 FMOD::Channel* g_completionAudioChannel = nullptr;
 bool g_practiceWasUsed = false;
+static bool g_musicPausedByMod = false;
+
+static inline bool gifsAvailable() {
+    if (auto dep = Loader::get()->getInstalledMod("user95401.gif-sprites")) {
+        return dep->shouldLoad();
+    }
+    return false;
+}
+static inline bool isGifPath(std::filesystem::path const& p) {
+    auto ext = p.extension().string();
+    return ext == ".gif" || ext == ".GIF";
+}
 
 class $modify(MyPauseLayer, PauseLayer) {
     void customSetup() {
@@ -22,9 +34,7 @@ class $modify(MyPauseLayer, PauseLayer) {
             return;
 
         auto btn = geode::cocos::CCMenuItemExt::createSpriteExtraWithFilename(
-            "ModMenuButton.png"_spr,
-            .6f,
-            [](CCObject*) {
+            "ModMenuButton.png"_spr, .67f, [](CCObject*) {
                 openSettingsPopup(Mod::get());
             }
         );
@@ -41,13 +51,53 @@ class $modify(MyPauseLayer, PauseLayer) {
 };
 
 class $modify(MyPlayLayer, PlayLayer) {
+    class AnyKeyListener : public CCLayer {
+    public:
+        MyPlayLayer* m_owner = nullptr;
+        bool m_armed = false;
+
+        static AnyKeyListener* create(MyPlayLayer* owner) {
+            auto p = new AnyKeyListener();
+            if (p && p->initWithOwner(owner)) {
+                p->autorelease();
+                return p;
+            }
+            CC_SAFE_DELETE(p);
+            return nullptr;
+        }
+
+        bool initWithOwner(MyPlayLayer* owner) {
+            if (!CCLayer::init()) return false;
+            m_owner = owner;
+            CCDirector::sharedDirector()->getKeyboardDispatcher()->addDelegate(this);
+            return true;
+        }
+
+        void onExit() override {
+            CCDirector::sharedDirector()->getKeyboardDispatcher()->removeDelegate(this);
+            CCLayer::onExit();
+        }
+
+        void keyDown(enumKeyCodes) override {
+            if (m_owner && m_armed) {
+                m_owner->returnToMenu();
+            }
+        }
+    };
+
     struct Fields {
         CCMenuItemSpriteExtra* m_invisibleExitButton = nullptr;
+        AnyKeyListener* m_anyKeyListener = nullptr;
     };
 
     void onEnterTransitionDidFinish() override {
         PlayLayer::onEnterTransitionDidFinish();
         g_practiceWasUsed = false;
+
+        if (m_fields->m_anyKeyListener) {
+            m_fields->m_anyKeyListener->removeFromParent();
+            m_fields->m_anyKeyListener = nullptr;
+        }
     }
 
     void levelComplete() {
@@ -86,8 +136,15 @@ class $modify(MyPlayLayer, PlayLayer) {
         } else if (visualMode == "Custom Image") {
             auto path = Mod::get()->getSettingValue<std::filesystem::path>("CustomTintImage");
             if (!path.empty()) {
-                sprite = CCSprite::create(path.string().c_str());
-                if (sprite) {
+                if (gifsAvailable() && isGifPath(path)) {
+                    sprite = CCSprite::create(path.string().c_str());
+                } else {
+                    sprite = CCSprite::create(path.string().c_str());
+                }
+                if (!sprite) {
+                    sprite = CCSprite::create();
+                    if (sprite) sprite->setTextureRect({ 0, 0, winSize.width, winSize.height });
+                } else {
                     sprite->setScaleX(winSize.width / sprite->getContentSize().width);
                     sprite->setScaleY(winSize.height / sprite->getContentSize().height);
                 }
@@ -125,6 +182,16 @@ class $modify(MyPlayLayer, PlayLayer) {
 
             addExitButton(sprite);
 
+            if (!m_fields->m_anyKeyListener) {
+                m_fields->m_anyKeyListener = AnyKeyListener::create(this);
+                if (m_fields->m_anyKeyListener) {
+                    m_fields->m_anyKeyListener->m_armed = true;
+                    this->addChild(m_fields->m_anyKeyListener, 10000);
+                }
+            } else {
+                m_fields->m_anyKeyListener->m_armed = true;
+            }
+
             bool autoLeave = Mod::get()->getSettingValue<bool>("AutoReturn");
             float returnDelay = Mod::get()->getSettingValue<float>("AutoReturnDelay");
 
@@ -140,7 +207,6 @@ class $modify(MyPlayLayer, PlayLayer) {
             auto audioPath = Mod::get()->getSettingValue<std::filesystem::path>("CustomCompletionAudio");
             float volume = Mod::get()->getSettingValue<float>("AudioVolume");
             float speed = Mod::get()->getSettingValue<float>("AudioSpeed");
-            std::string audioStyle = Mod::get()->getSettingValue<std::string>("AudioStyle");
 
             if (!audioPath.empty()) {
                 FMOD::System* system = FMODAudioEngine::sharedEngine()->m_system;
@@ -149,6 +215,14 @@ class $modify(MyPlayLayer, PlayLayer) {
                 std::string pathStr = audioPath.string();
 
                 if (system->createSound(pathStr.c_str(), FMOD_DEFAULT, nullptr, &sound) == FMOD_OK) {
+
+                    if (Mod::get()->getSettingValue<bool>("PauseNormalMusic")) {
+                        FMOD::ChannelGroup* masterGroup = nullptr;
+                        if (system->getMasterChannelGroup(&masterGroup) == FMOD_OK && masterGroup) {
+                            masterGroup->stop();
+                        }
+                    }
+
                     if (system->playSound(sound, nullptr, false, &g_completionAudioChannel) == FMOD_OK) {
                         if (g_completionAudioChannel) {
                             g_completionAudioChannel->setVolume(volume);
@@ -188,11 +262,15 @@ class $modify(MyPlayLayer, PlayLayer) {
         if (!Mod::get()->getSettingValue<bool>("ModEnabled"))
             return;
 
+        if (m_fields->m_anyKeyListener) {
+            m_fields->m_anyKeyListener->m_armed = false;
+        }
+
         this->onQuit();
     }
 
     void onQuit() {
-        if (Mod::get()->getSettingValue<std::string>("AudioStyle") == "Stop on exit") {
+        if (Mod::get()->getSettingValue<bool>("AudioStyle")) {
             if (g_completionAudioChannel) {
                 bool isPlaying = false;
                 g_completionAudioChannel->isPlaying(&isPlaying);
@@ -202,11 +280,17 @@ class $modify(MyPlayLayer, PlayLayer) {
             }
         }
 
+        if (m_fields->m_anyKeyListener) {
+            m_fields->m_anyKeyListener->removeFromParent();
+            m_fields->m_anyKeyListener = nullptr;
+        }
+
         PlayLayer::onQuit();
     }
 
     ~MyPlayLayer() {
         g_practiceWasUsed = false;
+        g_musicPausedByMod = false;
     }
 };
 

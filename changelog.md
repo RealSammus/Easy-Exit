@@ -1,3 +1,10 @@
+# 1.0.9
+
+- Now supports GIFs
+- New Pause Level Music option to pause the levels music when completing a level
+- Now supports all keys being pressed
+- Fixed pause menu button sizing
+
 # 1.0.8
 
 - Text fixes
