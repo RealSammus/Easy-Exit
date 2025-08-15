@@ -70,14 +70,18 @@ class $modify(MyPlayLayer, PlayLayer) {
         bool initWithOwner(MyPlayLayer* owner) {
             if (!CCLayer::init()) return false;
             m_owner = owner;
+        #ifndef __APPLE__   // <-- add
             CCDirector::sharedDirector()->getKeyboardDispatcher()->addDelegate(this);
+        #endif              // <-- add
             return true;
         }
-
+        
         void onExit() override {
+        #ifndef __APPLE__   // <-- add
             CCDirector::sharedDirector()->getKeyboardDispatcher()->removeDelegate(this);
+        #endif              // <-- add
             CCLayer::onExit();
-        }
+        }        
 
         void keyDown(enumKeyCodes) override {
             if (m_owner && m_armed) {
