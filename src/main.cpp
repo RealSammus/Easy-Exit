@@ -6,6 +6,7 @@
 #include <Geode/binding/FMODAudioEngine.hpp>
 #include <Geode/ui/GeodeUI.hpp>
 #include <Geode/utils/cocos.hpp>
+#include <Geode/loader/Loader.hpp>
 #include <filesystem>
 
 using namespace geode::prelude;
