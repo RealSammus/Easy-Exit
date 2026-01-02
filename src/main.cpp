@@ -81,6 +81,19 @@ class $modify(MyPlayLayer, PlayLayer) {
         AnyKeyListener* m_anyKeyListener = nullptr;
     };
 
+    void customizeAnimatedImage(CCSprite* newSprite) {
+        imgp::AnimatedSprite* animatedSprite = imgp::AnimatedSprite::from(newSprite);
+        if (!animatedSprite || !animatedSprite->isAnimated()) return;
+        animatedSprite->stop();
+        animatedSprite->setForceLoop(std::make_optional<bool>(Mod::get()->getSettingValue<bool>("LoopImage")));
+        int oneSpecificFrame = Mod::get()->getSettingValue<int>("OneSpecificFrame");
+        if (oneSpecificFrame < 0) oneSpecificFrame = 0;
+        if (oneSpecificFrame > animatedSprite->getFrameCount() - 1) oneSpecificFrame = animatedSprite->getFrameCount() - 1;
+        animatedSprite->setCurrentFrame(oneSpecificFrame);
+        float playbackSpeed = std::clamp<float>(Mod::get()->getSettingValue<float>("PlaybackSpeed"), -4.f, 4.f);
+        if (playbackSpeed != 0.f) animatedSprite->setPlaybackSpeed(playbackSpeed);
+    }
+
     void onEnterTransitionDidFinish() override {
         PlayLayer::onEnterTransitionDidFinish();
 
@@ -132,6 +145,7 @@ class $modify(MyPlayLayer, PlayLayer) {
                 } else {
                     sprite->setScaleX(winSize.width / sprite->getContentSize().width);
                     sprite->setScaleY(winSize.height / sprite->getContentSize().height);
+                    MyPlayLayer::customizeAnimatedImage(sprite);
                 }
             }
             if (!sprite) {
