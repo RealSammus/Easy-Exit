@@ -1,5 +1,5 @@
 {
-	"geode": "4.6.3",
+	"geode": "4.10.0",
 	"gd": {
 		"win": "2.2074",
 		"android": "2.2074",
@@ -12,10 +12,7 @@
 	"developer": "Sam",
 	"description": "",
 	"dependencies": {
-		"user95401.gif-sprites": {
-			"version": ">=v2.0.0",
-			"importance": "recommended"
-		}
+		"prevter.imageplus": ">=v1.0.3"
 	},
 	"settings": {
 		"mod-section": {
