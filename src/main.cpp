@@ -82,6 +82,7 @@ class $modify(MyPlayLayer, PlayLayer) {
     };
 
     void customizeAnimatedImage(CCSprite* newSprite) {
+        if (!newSprite) return;
         imgp::AnimatedSprite* animatedSprite = imgp::AnimatedSprite::from(newSprite);
         if (!animatedSprite || !animatedSprite->isAnimated()) return;
         animatedSprite->stop();
