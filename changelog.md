@@ -1,3 +1,7 @@
+# 1.1.0
+
+- Fixed the link to NotAstrald's profile within the mod description
+
 # 1.0.9
 
 - Now supports GIFs
