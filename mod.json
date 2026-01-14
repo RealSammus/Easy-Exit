@@ -1,5 +1,5 @@
 {
-	"geode": "4.6.3",
+	"geode": "4.10.0",
 	"gd": {
 		"win": "2.2074",
 		"android": "2.2074",
@@ -12,10 +12,7 @@
 	"developer": "Sam",
 	"description": "",
 	"dependencies": {
-		"user95401.gif-sprites": {
-			"version": ">=v2.0.0",
-			"importance": "recommended"
-		}
+		"prevter.imageplus": ">=v1.0.3"
 	},
 	"settings": {
 		"mod-section": {
@@ -201,6 +198,31 @@
 			"name": "Pause normal level music",
 			"description": "Pauses the levels music when completing a level",
 			"default": false
+		},
+		"AnimatedPictureHeaders": {
+			"name": "Animated Custom Images",
+			"description": "Settings for animated custom images (these settings only apply to animated images)",
+			"type": "title"
+		},
+		"LoopImage": {
+			"name": "Loop Animated Image",
+			"description": "Choose if the selected animated image will loop.",
+			"type": "bool",
+			"default": true
+		},
+		"PlaybackSpeed": {
+			"name": "Animated Image Playback Speed",
+			"description": "Sets the playback speed of the selected animated image. Negative values will play the animated image in reverse.",
+			"type": "float",
+			"default": 1.00,
+			"min": -4.0,
+			"max": 4.00
+		},
+		"OneSpecificFrame": {
+			"name": "Animated Image Specific Frame",
+			"description": "Sets the specific frame of the selected animated image. If the playback speed is 0.00, this is the frame the animated image will use. Otherwise, this is the frame the animated image will start playing from.",
+			"type": "int",
+			"default": 0
 		}
 
 	},

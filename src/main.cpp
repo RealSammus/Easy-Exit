@@ -8,24 +8,12 @@
 #include <Geode/utils/cocos.hpp>
 #include <Geode/loader/Loader.hpp>
 #include <filesystem>
+#include <prevter.imageplus/include/api.hpp>
 
 using namespace geode::prelude;
 using namespace cocos2d;
 
 FMOD::Channel* g_completionAudioChannel = nullptr;
-bool g_practiceWasUsed = false;
-static bool g_musicPausedByMod = false;
-
-static inline bool gifsAvailable() {
-    if (auto dep = Loader::get()->getInstalledMod("user95401.gif-sprites")) {
-        return dep->shouldLoad();
-    }
-    return false;
-}
-static inline bool isGifPath(std::filesystem::path const& p) {
-    auto ext = p.extension().string();
-    return ext == ".gif" || ext == ".GIF";
-}
 
 class $modify(MyPauseLayer, PauseLayer) {
     void customSetup() {
@@ -47,8 +35,6 @@ class $modify(MyPauseLayer, PauseLayer) {
             rightMenu->updateLayout();
         }
     }
-
-    void onPracticeMode(CCObject* sender);
 };
 
 class $modify(MyPlayLayer, PlayLayer) {
@@ -95,9 +81,22 @@ class $modify(MyPlayLayer, PlayLayer) {
         AnyKeyListener* m_anyKeyListener = nullptr;
     };
 
+    void customizeAnimatedImage(CCSprite* newSprite) {
+        if (!newSprite) return;
+        imgp::AnimatedSprite* animatedSprite = imgp::AnimatedSprite::from(newSprite);
+        if (!animatedSprite || !animatedSprite->isAnimated()) return;
+        animatedSprite->stop();
+        animatedSprite->setForceLoop(std::make_optional<bool>(Mod::get()->getSettingValue<bool>("LoopImage")));
+        int oneSpecificFrame = Mod::get()->getSettingValue<int>("OneSpecificFrame");
+        if (oneSpecificFrame < 0) oneSpecificFrame = 0;
+        if (oneSpecificFrame > animatedSprite->getFrameCount() - 1) oneSpecificFrame = animatedSprite->getFrameCount() - 1;
+        animatedSprite->setCurrentFrame(oneSpecificFrame);
+        float playbackSpeed = std::clamp<float>(Mod::get()->getSettingValue<float>("PlaybackSpeed"), -4.f, 4.f);
+        if (playbackSpeed != 0.f) animatedSprite->setPlaybackSpeed(playbackSpeed);
+    }
+
     void onEnterTransitionDidFinish() override {
         PlayLayer::onEnterTransitionDidFinish();
-        g_practiceWasUsed = false;
 
         if (m_fields->m_anyKeyListener) {
             m_fields->m_anyKeyListener->removeFromParent();
@@ -111,13 +110,12 @@ class $modify(MyPlayLayer, PlayLayer) {
             return;
         }
 
-        if (Mod::get()->getSettingValue<bool>("PracticeReturn") && g_practiceWasUsed) {
+        if (Mod::get()->getSettingValue<bool>("PracticeReturn") && m_isPracticeMode) {
             PlayLayer::levelComplete();
             return;
         }
 
         PlayLayer::levelComplete();
-        g_practiceWasUsed = false;
 
         auto winSize = CCDirector::sharedDirector()->getWinSize();
         ccColor3B visualColor = Mod::get()->getSettingValue<ccColor3B>("TintColor");
@@ -141,17 +139,14 @@ class $modify(MyPlayLayer, PlayLayer) {
         } else if (visualMode == "Custom Image") {
             auto path = Mod::get()->getSettingValue<std::filesystem::path>("CustomTintImage");
             if (!path.empty()) {
-                if (gifsAvailable() && isGifPath(path)) {
-                    sprite = CCSprite::create(path.string().c_str());
-                } else {
-                    sprite = CCSprite::create(path.string().c_str());
-                }
+                sprite = CCSprite::create(geode::utils::string::pathToString(path).c_str());
                 if (!sprite) {
                     sprite = CCSprite::create();
                     if (sprite) sprite->setTextureRect({ 0, 0, winSize.width, winSize.height });
                 } else {
                     sprite->setScaleX(winSize.width / sprite->getContentSize().width);
                     sprite->setScaleY(winSize.height / sprite->getContentSize().height);
+                    MyPlayLayer::customizeAnimatedImage(sprite);
                 }
             }
             if (!sprite) {
@@ -263,7 +258,6 @@ class $modify(MyPlayLayer, PlayLayer) {
     }
 
     void returnToMenu() {
-        g_practiceWasUsed = false;
         if (!Mod::get()->getSettingValue<bool>("ModEnabled"))
             return;
 
@@ -292,17 +286,4 @@ class $modify(MyPlayLayer, PlayLayer) {
 
         PlayLayer::onQuit();
     }
-
-    ~MyPlayLayer() {
-        g_practiceWasUsed = false;
-        g_musicPausedByMod = false;
-    }
 };
-
-void MyPauseLayer::onPracticeMode(CCObject* sender) {
-    PauseLayer::onPracticeMode(sender);
-    auto pl = PlayLayer::get();
-    if (pl && pl->m_isPracticeMode) {
-        g_practiceWasUsed = true;
-    }
-}
