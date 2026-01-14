@@ -20,7 +20,7 @@ No more waiting around for the exit menu, just **<cy>click</c>** to leave a leve
 
 • **<cd>kam.dev_</c>** - Bug testing
 
-• **[Astrald](user:18117775)** - Bug testing
+• **[Astrald](user:6762856)** - Bug testing
 
 • **[Shenirem](user:25514001)** - Bug testing and suggestions
 
